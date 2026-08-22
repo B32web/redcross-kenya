@@ -1,10 +1,14 @@
 const express = require('express');
-const { initiateStkPush, StkPushError } = require('../stkpush');
+const { initiateStkPush, StkPushError } = require('../stkpush'); // ← FIXED: lowercase 'stkpush'
 const db = require('../db');
 const logger = require('../logger');
 
 const router = express.Router();
 
+/**
+ * POST /api/payments/stk-push
+ * Body: { phoneNumber, amount, description?, orderId? }
+ */
 router.post('/stk-push', async (req, res) => {
   const { phoneNumber, amount, description, orderId } = req.body || {};
 
@@ -40,6 +44,9 @@ router.post('/stk-push', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/payments/status/:transactionId
+ */
 router.get('/status/:transactionId', (req, res) => {
   const tx = db.findById(req.params.transactionId);
   if (!tx) {
@@ -48,7 +55,7 @@ router.get('/status/:transactionId', (req, res) => {
   return res.json({
     ok: true,
     transactionId: tx.id,
-    status: tx.status,
+    status: tx.status, // PENDING | SUCCESS | FAILED | TIMEOUT | ERROR
     amount: tx.amount,
     mpesaReceipt: tx.mpesa_receipt || null,
     resultDesc: tx.result_desc || null,
