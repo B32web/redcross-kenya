@@ -1,5 +1,5 @@
 const express = require('express');
-const { initiateStkPush, StkPushError } = require('../stkpush'); // ← FIXED: lowercase 'stkpush'
+const { initiateStkPush, StkPushError } = require('../stkPush'); // ← FIXED: lowercase 'stkpush'
 const db = require('../db');
 const logger = require('../logger');
 
