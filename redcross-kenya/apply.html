@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apply for Aid - Kenya Red Cross</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="logo-container">
+        <div class="red-cross-emblem">
+          <div class="cross-v"></div>
+          <div class="cross-h"></div>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title"><span class="dark">Kenya</span> Red Cross</span>
+          <span class="logo-sub">Official Humanitarian Aid Portal</span>
+        </div>
+      </a>
+      <div class="nav-buttons">
+        <span id="auth-buttons">
+          <a href="login.html" class="btn btn--ghost btn--sm">Login</a>
+        </span>
+        <span id="user-menu" style="display:none;">
+          <div class="dropdown">
+            <div class="user-avatar" id="user-avatar">U</div>
+            <div class="dropdown-content">
+              <a href="dashboard.html">My applications</a>
+              <button onclick="logoutUser()">Log out</button>
+            </div>
+          </div>
+        </span>
+        <a href="index.html" class="btn btn--ghost btn--sm">Home</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <div class="panel panel--wide">
+      <!-- STEPPER -->
+      <div class="stepper">
+        <div class="step-item active" id="step-nav-1">1. Personal Details</div>
+        <div class="step-item" id="step-nav-2">2. Questionnaire</div>
+        <div class="step-item" id="step-nav-3">3. Payment &amp; Submit</div>
+      </div>
+
+      <!-- ======================== STEP 1 ======================== -->
+      <div id="reg-step-1">
+        <h2 class="panel-title">Step 1: Personal Details</h2>
+        <p class="panel-sub">Enter your basic contact and identification information.</p>
+
+        <label class="field">
+          <span>Full Name (as per National ID) *</span>
+          <input type="text" id="reg-fullName" placeholder="e.g. Mary Wanjiku Kamau" />
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Email Address *</span>
+            <input type="email" id="reg-email" placeholder="mary@example.com" />
+          </label>
+          <label class="field">
+            <span>Phone Number *</span>
+            <input type="text" id="reg-phone" placeholder="0712345678" />
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label class="field">
+            <span>National ID Number *</span>
+            <input type="text" id="reg-idNum" placeholder="12345678" />
+          </label>
+          <label class="field">
+            <span>County of Residence *</span>
+            <select id="reg-location">
+              <option value="">Select County</option>
+              <option value="Nairobi">Nairobi</option>
+              <option value="Mombasa">Mombasa</option>
+              <option value="Kisumu">Kisumu</option>
+              <option value="Nakuru">Nakuru</option>
+              <option value="Kiambu">Kiambu</option>
+              <option value="Machakos">Machakos</option>
+              <option value="Uasin Gishu">Uasin Gishu</option>
+              <option value="Kakamega">Kakamega</option>
+              <option value="Kilifi">Kilifi</option>
+              <option value="Meru">Meru</option>
+              <option value="Embu">Embu</option>
+              <option value="Bungoma">Bungoma</option>
+              <option value="Turkana">Turkana</option>
+              <option value="Garissa">Garissa</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="form-error" id="step1-error"></div>
+
+        <div class="panel-nav">
+          <span></span>
+          <button class="btn btn--red" onclick="goToStep(2)">Next →</button>
+        </div>
+      </div>
+
+      <!-- ======================== STEP 2 ======================== -->
+      <div id="reg-step-2" style="display:none;">
+        <h2 class="panel-title">Step 2: Questionnaire</h2>
+        <p class="panel-sub">Answer honestly. The system will automatically determine your category.</p>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Age *</span>
+            <input type="number" id="reg-age" placeholder="e.g. 34" oninput="recalculateTier()" />
+          </label>
+          <label class="field">
+            <span>Marital Status *</span>
+            <select id="reg-maritalStatus" onchange="recalculateTier()">
+              <option value="single">Single</option>
+              <option value="single_parent">Single Parent</option>
+              <option value="widow">Widow / Widower</option>
+              <option value="married">Married</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Parental Status *</span>
+            <select id="reg-parentalStatus" onchange="recalculateTier()">
+              <option value="both_alive">Both Parents Alive</option>
+              <option value="one_deceased">One Parent Alive (One Deceased)</option>
+              <option value="both_deceased">Both Parents Deceased</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Number of Dependents</span>
+            <select id="reg-dependents" onchange="recalculateTier()">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4+">4 or more</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Calamity Impact *</span>
+            <select id="reg-calamityType" onchange="recalculateTier()">
+              <option value="none">None / Standard Situation</option>
+              <option value="floods">Floods Emergency</option>
+              <option value="drought">Severe Drought</option>
+              <option value="other">Other Calamity</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Disability Status *</span>
+            <select id="reg-hasDisability" onchange="recalculateTier()">
+              <option value="no">No Disability</option>
+              <option value="yes">Yes, Living with Disability</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Briefly describe your situation</span>
+          <textarea id="applicant-description" rows="4" placeholder="Tell us more about your circumstances..."></textarea>
+        </label>
+
+        <div class="form-error" id="step2-error"></div>
+
+        <!-- Tier Result (NO PAYMENT MENTION) -->
+        <div id="assessment-result" style="background:var(--bg-elevated); border:2px solid var(--border); border-radius:10px; padding:18px; margin:18px 0; display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <span style="font-size:12px; color:var(--text-faint);">Your assessed tier</span>
+              <strong id="assessed-tier" style="display:block; font-family:'Space Grotesk',sans-serif; font-size:24px; color:var(--rc-red);">—</strong>
+            </div>
+            <div>
+              <span style="font-size:12px; color:var(--text-faint);">Monthly aid</span>
+              <strong id="assessed-amount" style="display:block; font-family:'Space Grotesk',sans-serif; font-size:24px; color:var(--green);">KES 0</strong>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn--red full-width" id="assess-btn" onclick="displayAssessment()">Assess my application</button>
+
+        <div class="panel-nav">
+          <button class="btn btn--ghost" onclick="goToStep(1)">← Back</button>
+          <button class="btn btn--red" onclick="goToStep(3)">Next →</button>
+        </div>
+      </div>
+
+      <!-- ======================== STEP 3 ======================== -->
+      <div id="reg-step-3" style="display:none;">
+        <h2 class="panel-title">Step 3: Payment &amp; Submit</h2>
+        <p class="panel-sub">Review your details and complete the registration fee payment.</p>
+
+        <input type="hidden" id="reg-ref-code" />
+
+        <!-- Summary -->
+        <div class="summary-box">
+          <div class="summary-row"><span>Full Name</span> <strong id="sum-name">-</strong></div>
+          <div class="summary-row"><span>Phone Number</span> <strong id="sum-phone">-</strong></div>
+          <div class="summary-row"><span>County</span> <strong id="sum-county">-</strong></div>
+          <div class="summary-row"><span>Assessed Tier</span> <strong id="sum-tier">-</strong></div>
+          <div class="summary-row"><span>Monthly Aid</span> <strong id="sum-grant">-</strong></div>
+          <div class="summary-row" style="border-top:2px solid var(--rc-red); padding-top:8px; margin-top:4px;">
+            <span style="font-weight:700; color:var(--rc-red);">Registration Fee</span>
+            <strong id="sum-fee" style="color:var(--rc-red);">KES 0</strong>
+          </div>
+        </div>
+
+        <div style="background:var(--rc-red-soft); border:1px solid var(--rc-red); padding:14px; border-radius:6px; margin-bottom:16px;">
+          <p style="font-size:13px; color:var(--text); margin:0;">
+            <strong>🔴 Registration Fee:</strong> This one-time fee confirms your commitment and covers administrative costs. 
+            You will receive monthly aid via STK Push after approval.
+          </p>
+        </div>
+
+        <!-- Pay Now Button -->
+        <button class="btn btn--red full-width" onclick="triggerStkPush()" style="padding:14px; font-size:16px;" id="pay-btn">
+          Pay Registration Fee — STK Push
+        </button>
+        <p style="font-size:12px; color:var(--text-faint); text-align:center; margin:10px 0;">
+          You will receive an M-PESA prompt on your phone. Enter your PIN to complete payment.
+        </p>
+
+        <div class="form-error" id="step3-error"></div>
+
+        <div class="panel-nav">
+          <button class="btn btn--ghost" onclick="goToStep(2)">← Back</button>
+          <button class="btn btn--red" onclick="submitApplication()">Submit Application</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/supabase-client.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/apply.js"></script>
+
+</body>
+</html>
