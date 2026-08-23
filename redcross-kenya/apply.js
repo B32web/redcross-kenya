@@ -89,7 +89,7 @@ function assessTier() {
 function displayAssessment() {
   const result = assessTier();
   const resultDiv = document.getElementById('assessment-result');
-  const errorEl = document.getElementById('step2-error'); // ✅ Fixed: use step2-error
+  const errorEl = document.getElementById('step2-error');
 
   if (!result || !resultDiv) {
     if (errorEl) {
@@ -99,7 +99,6 @@ function displayAssessment() {
     return;
   }
 
-  // Hide any previous error
   if (errorEl) errorEl.classList.remove('show');
 
   resultDiv.style.display = 'block';
@@ -175,7 +174,6 @@ function goToStep(stepNum) {
     document.getElementById('sum-grant').textContent = 'KES ' + parseInt(resultDiv.dataset.amount).toLocaleString();
     document.getElementById('sum-fee').textContent = 'KES ' + parseInt(resultDiv.dataset.fee).toLocaleString();
 
-    // Hide any previous error
     const errorEl = document.getElementById('step2-error');
     if (errorEl) errorEl.classList.remove('show');
   }
@@ -396,11 +394,6 @@ async function submitApplication() {
 document.addEventListener('DOMContentLoaded', () => {
   const assessBtn = document.getElementById('assess-btn');
   if (assessBtn) assessBtn.addEventListener('click', displayAssessment);
-
-  // We removed the 'proceed-to-payment' listener because it's redundant – use goToStep(3) directly in HTML.
-  // If your HTML uses id="proceed-to-payment", you can uncomment the following:
-  // const proceedBtn = document.getElementById('proceed-to-payment');
-  // if (proceedBtn) proceedBtn.addEventListener('click', () => goToStep(3));
 
   // Reset assessment result when questions change
   const questions = document.querySelectorAll('#q-disability, #q-disease, #q-parent-death, #q-calamity, #q-general');
