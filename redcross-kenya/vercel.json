@@ -7,6 +7,4 @@
     { "source": "/status", "destination": "/status.html" },
     { "source": "/confirmation", "destination": "/confirmation.html" }
   ]
-}      
-
-  this one
+}
