@@ -50,7 +50,6 @@ function displayAssessment() {
 
   if (!result) {
     resultDiv.style.display = 'none';
-    // Use step2-error instead of apply-error
     document.getElementById('step2-error').textContent = 'Please answer the questions to assess your tier.';
     document.getElementById('step2-error').classList.add('show');
     return;
@@ -69,9 +68,6 @@ function displayAssessment() {
 
 let pollingInterval = null;
 
-// =============================================================
-// STEPPER NAVIGATION
-// =============================================================
 function goToStep(stepNum) {
   document.getElementById('reg-step-1').style.display = stepNum === 1 ? 'block' : 'none';
   document.getElementById('reg-step-2').style.display = stepNum === 2 ? 'block' : 'none';
@@ -119,9 +115,6 @@ function goToStep(stepNum) {
   }
 }
 
-// =============================================================
-// STK PUSH — TRIGGER REGISTRATION FEE
-// =============================================================
 async function triggerStkPush() {
   const resultDiv = document.getElementById('assessment-result');
   const fee = parseInt(resultDiv.dataset.fee);
@@ -160,7 +153,6 @@ async function triggerStkPush() {
     document.getElementById('step3-error').classList.remove('show');
     document.getElementById('reg-ref-code').value = result.transactionId;
 
-    // Start polling for payment status
     startPolling(result.transactionId);
 
     alert('✅ STK Push sent to ' + phone + '!\nCheck your phone and enter M-PIN to complete payment.');
@@ -174,9 +166,6 @@ async function triggerStkPush() {
   btn.innerHTML = 'Pay Registration Fee — STK Push';
 }
 
-// =============================================================
-// POLL PAYMENT STATUS
-// =============================================================
 function startPolling(transactionId) {
   if (pollingInterval) clearInterval(pollingInterval);
 
@@ -217,9 +206,6 @@ function startPolling(transactionId) {
   }, 3000);
 }
 
-// =============================================================
-// SUBMIT APPLICATION
-// =============================================================
 async function submitApplication() {
   const refCode = document.getElementById('reg-ref-code').value;
   if (!refCode) {
@@ -281,12 +267,8 @@ function normalizeKenyanPhone(raw) {
   return null;
 }
 
-// =============================================================
-// EVENT LISTENERS
-// =============================================================
+// Event listeners
 document.getElementById('assess-btn').addEventListener('click', displayAssessment);
-
-// 🔴 REMOVED the broken 'proceed-to-payment' listener – it's not needed
 
 // Auto-assess on question change
 document.querySelectorAll('#q-disability, #q-disease, #q-parent-death, #q-calamity, #q-general').forEach(el => {
@@ -295,9 +277,7 @@ document.querySelectorAll('#q-disability, #q-disease, #q-parent-death, #q-calami
   });
 });
 
-// =============================================================
-// EXPOSE FUNCTIONS TO GLOBAL (for onclick attributes)
-// =============================================================
+// Expose to global
 window.goToStep = goToStep;
 window.displayAssessment = displayAssessment;
 window.triggerStkPush = triggerStkPush;
