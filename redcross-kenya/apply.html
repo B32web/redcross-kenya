@@ -41,7 +41,6 @@
       border-bottom: 2px solid #eaeaea;
       padding-bottom: 18px;
     }
-    /* STEP INDICATORS */
     .step-indicators {
       display: flex;
       gap: 12px;
@@ -61,14 +60,12 @@
       background: #D71920;
       color: #fff;
     }
-    /* STEPS */
     .step {
       display: none;
     }
     .step.active {
       display: block;
     }
-    /* FORM ELEMENTS */
     .form-group {
       margin-bottom: 20px;
     }
@@ -140,7 +137,6 @@
     .success {
       color: #1a7c3e;
     }
-    /* ASSESSMENT RESULT */
     #assessment-result {
       display: none;
       background: #f4f6fa;
@@ -192,7 +188,6 @@
       display: none;
     }
     .status-msg.show { display: block; }
-    /* Responsive */
     @media (max-width: 600px) {
       .container { padding: 25px 20px; }
       h1 { font-size: 26px; }
@@ -214,7 +209,7 @@
     <span class="step-item" id="step-nav-3">3. Payment & Submit</span>
   </div>
 
-  <!-- ==================== STEP 1 ==================== -->
+  <!-- STEP 1 -->
   <div class="step active" id="reg-step-1">
     <h2 style="font-family:'Montserrat'; font-size:22px; margin-bottom:16px;">Your Details</h2>
     <div class="form-group">
@@ -246,7 +241,7 @@
     <button class="btn" onclick="goToStep(2)">Next →</button>
   </div>
 
-  <!-- ==================== STEP 2 ==================== -->
+  <!-- STEP 2 -->
   <div class="step" id="reg-step-2">
     <h2 style="font-family:'Montserrat'; font-size:22px; margin-bottom:16px;">Tier Assessment</h2>
     <p style="color:#555; margin-bottom:20px;">Answer the questions below to determine your aid tier.</p>
@@ -302,7 +297,7 @@
     <button class="btn" onclick="goToStep(3)" style="margin-top:20px;">Proceed to Payment →</button>
   </div>
 
-  <!-- ==================== STEP 3 ==================== -->
+  <!-- STEP 3 -->
   <div class="step" id="reg-step-3">
     <h2 style="font-family:'Montserrat'; font-size:22px; margin-bottom:16px;">Payment & Submit</h2>
     <p style="color:#555; margin-bottom:20px;">Pay the one‑time registration fee via M‑PESA STK Push.</p>
@@ -329,14 +324,14 @@
 </div>
 
 <!-- ============================================================= -->
-<!-- SUPABASE INITIALISATION (REPLACE WITH YOUR CREDENTIALS)        -->
+<!-- SUPABASE INITIALISATION – CREDENTIALS NOW CORRECT             -->
 <!-- ============================================================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 </script>
 <script>
-  // 🔴 REPLACE these with your actual Supabase URL and anon key
-  const SUPABASE_URL = "YOUR_SUPABASE_URL";
-  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  // 🔴 Your actual Supabase credentials
+  const SUPABASE_URL = "https://obucqswptdbnktaaayoh.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_laBoykhOTssfpTfn8n1KXQ_yMt4Tt6O";
 
   // Create Supabase client and expose it globally
   window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
