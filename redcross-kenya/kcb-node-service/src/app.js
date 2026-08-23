@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors'); // ← ADDED
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const config = require('./config');
@@ -10,6 +11,23 @@ const callbackRouter = require('./routes/callback');
 const app = express();
 
 app.disable('x-powered-by');
+
+// =============================================================
+// CORS – Allow your frontend to call this API
+// =============================================================
+app.use(cors({
+  origin: [
+    'https://kenya-redcross.vercel.app',
+    'https://kenya-redcross-officiall-website-xu2icfxvr-b32webs-projects.vercel.app',
+    'https://redcross-kenya-ebbh8zugo-b32webs-projects.vercel.app',
+    'https://redcross-kenya-36g9-1xtdbtpu4-b32webs-projects.vercel.app',
+    // Add any other frontend URLs you use
+  ],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false,
+}));
+
 app.use(helmet());
 app.use(express.json({ limit: '256kb' }));
 
