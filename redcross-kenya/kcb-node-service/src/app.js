@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors'); // ← ADDED
+const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const config = require('./config');
@@ -10,35 +10,31 @@ const callbackRouter = require('./routes/callback');
 
 const app = express();
 app.disable('x-powered-by');
-app.use(helmet());
 
-// =============================================================
-// CORS – Allow your frontend origins
-// =============================================================
+// ===== CORS – Whitelist your frontend domains =====
 const allowedOrigins = [
+  'https://kenya-redcross-officiall-website.vercel.app',
   'https://kenya-redcross-officiall-website-xu2icfxvr-b32webs-projects.vercel.app',
   'https://redcross-kenya-ebbh8zugo-b32webs-projects.vercel.app',
   'https://redcross-kenya-36g9-1xtdbtpu4-b32webs-projects.vercel.app',
-  // If you're using a custom domain, add it here
-  // For testing, you can also allow all origins: app.use(cors());
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl)
     if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
+      callback(null, true);
+    } else {
+      logger.warn('Blocked CORS request from origin', { origin });
+      callback(new Error('Not allowed by CORS'));
     }
-    logger.warn('Blocked CORS request from origin', { origin });
-    return callback(new Error('Not allowed by CORS'));
   },
-  methods: ['GET', 'POST'],
-  credentials: false,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
+app.use(helmet());
 app.use(express.json({ limit: '256kb' }));
 
-// Rate limiting for STK push
 const stkPushLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
@@ -47,21 +43,17 @@ const stkPushLimiter = rateLimit({
   message: { ok: false, error: 'Too many payment requests — please wait a moment and try again' },
 });
 
-// Mount routes
 app.use('/api/payments/stk-push', stkPushLimiter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/payments', callbackRouter);
 
-// Health check
 app.get('/health', (req, res) => res.json({ ok: true, uptime: process.uptime() }));
 
-// Global error handler
 app.use((err, req, res, next) => {
   logger.error('Unhandled error', { error: err.message, stack: err.stack });
   res.status(500).json({ ok: false, error: 'Internal server error' });
 });
 
-// Sweep stale transactions
 const sweeper = setInterval(() => {
   try {
     db.sweepStalePending(config.stk.pendingTimeoutSeconds);
