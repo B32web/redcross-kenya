@@ -97,6 +97,12 @@
       box-shadow: 0 6px 14px rgba(215,25,32,0.3);
     }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-success {
+      background: #2e7d32;
+    }
+    .btn-success:hover {
+      background: #1b5e20;
+    }
     .error {
       color: #D71920;
       font-size: 14px;
@@ -138,11 +144,11 @@
     }
     .copy-btn:hover { background: #f0f0f0; }
     .payment-box {
-      background: #f4f6fa;
+      background: #e8f5e9;
       border-radius: 12px;
-      padding: 24px;
+      padding: 20px 24px;
       margin: 20px 0;
-      border-left: 5px solid #D71920;
+      border-left: 5px solid #2e7d32;
     }
     .payment-row {
       display: flex;
@@ -151,12 +157,13 @@
       background: #fff;
       padding: 10px 14px;
       border-radius: 8px;
-      border: 1px solid #ddd;
+      border: 1px solid #c8e6c9;
       margin-bottom: 10px;
       flex-wrap: wrap;
     }
-    .payment-row .label { font-weight: 600; font-size: 12px; color: #666; min-width: 70px; }
-    .payment-row .value { font-family: monospace; font-size: 20px; font-weight: 800; color: #D71920; flex: 1; }
+    .payment-row .label { font-weight: 600; font-size: 12px; color: #555; min-width: 70px; }
+    .payment-row .value { font-family: monospace; font-size: 20px; font-weight: 800; color: #2e7d32; flex: 1; }
+    .payment-row .copy-btn { color: #2e7d32; }
     .status-msg {
       margin: 15px 0;
       padding: 12px 16px;
@@ -166,6 +173,45 @@
       display: none;
     }
     .status-msg.show { display: block; }
+    .notice-banner {
+      background: #fff3cd;
+      border-left: 5px solid #ffc107;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+    .notice-banner p {
+      margin: 0;
+      font-size: 14px;
+      color: #856404;
+    }
+    .stk-disabled {
+      background: #f5f5f5;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 20px 0;
+      border-left: 5px solid #999;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .stk-disabled .badge {
+      background: #ff9800;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 10px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+    .stk-disabled h3 {
+      font-family: 'Montserrat', sans-serif;
+      color: #666;
+      margin: 0;
+    }
+    .stk-disabled .btn {
+      background: #999 !important;
+      cursor: not-allowed !important;
+    }
     @media (max-width: 600px) {
       .container { padding: 25px 20px; }
       h1 { font-size: 26px; }
@@ -276,9 +322,18 @@
     <button class="btn" onclick="goToStep(3)" style="margin-top:20px;">Proceed to Payment →</button>
   </div>
 
-  <!-- STEP 3 – MANUAL PAYMENT -->
+  <!-- ==================== STEP 3 ==================== -->
   <div class="step" id="reg-step-3">
     <h2 style="font-family:'Montserrat'; font-size:22px; margin-bottom:16px;">Payment & Submit</h2>
+
+    <!-- ===== NOTICE BANNER ===== -->
+    <div class="notice-banner">
+      <p>
+        ⚠️ <strong>STK Push is temporarily unavailable</strong> while we upgrade the system.<br>
+        Please use the <strong>manual M-PESA Paybill option</strong> below. Your application will be processed once payment is confirmed.
+      </p>
+    </div>
+
     <p style="color:#555; margin-bottom:20px;">Pay the registration fee via M-PESA Paybill.</p>
 
     <div id="summary">
@@ -290,9 +345,9 @@
       <p><strong>Registration Fee:</strong> <span id="sum-fee"></span></p>
     </div>
 
-    <!-- PAYMENT INSTRUCTIONS -->
+    <!-- ===== MANUAL PAYMENT (ACTIVE) ===== -->
     <div class="payment-box">
-      <h3 style="font-family:'Montserrat'; margin-bottom:12px;">📱 M-PESA Payment Instructions</h3>
+      <h3 style="font-family:'Montserrat'; color: #1b5e20; margin-bottom:12px;">✅ Manual M-PESA Paybill (Active)</h3>
 
       <div class="payment-row">
         <span class="label">Paybill Number</span>
@@ -311,7 +366,7 @@
         <span class="value" id="payment-amount">0</span>
       </div>
 
-      <p style="font-size: 13px; color: #555; margin: 15px 0 10px 0; line-height: 1.8;">
+      <p style="font-size:13px; color:#2e7d32; margin:12px 0; line-height:1.8;">
         <strong>Instructions:</strong><br>
         1. Go to M-PESA <strong>Lipa na M-PESA</strong> → <strong>Paybill</strong><br>
         2. Enter Business Number: <strong id="paybill-ref">522533</strong><br>
@@ -320,28 +375,39 @@
         5. Enter your M-PESA PIN and confirm<br>
         6. Enter the M-PESA confirmation code below
       </p>
+
+      <!-- Transaction Code Input -->
+      <div class="form-group" style="margin-bottom:10px;">
+        <label style="font-weight:600; font-size:13px;">M-PESA Transaction Code *</label>
+        <input type="text" id="mpesa-transaction-id" placeholder="e.g. QGH7X9ABC1" required />
+        <small style="color:#888;">Enter the transaction code from your M-PESA confirmation SMS after paying.</small>
+      </div>
+
+      <button class="btn btn-success" onclick="submitApplicationManual()">
+        Submit Application with Manual Payment
+      </button>
     </div>
 
-    <!-- M-PESA TRANSACTION CODE -->
-    <div class="form-group">
-      <label>M-PESA Transaction Code *</label>
-      <input type="text" id="mpesa-transaction-id" placeholder="e.g. QGH7X9ABC1" required />
-      <small style="color:#888;">Enter the transaction code from your M-PESA confirmation SMS after paying.</small>
+    <!-- ===== STK PUSH (DISABLED / COMING SOON) ===== -->
+    <div class="stk-disabled">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <h3 style="font-family:'Montserrat'; color: #666; margin:0;">🔧 STK Push</h3>
+        <span class="badge">Coming Soon</span>
+      </div>
+      <p style="color:#888; font-size:13px; margin:0;">We're upgrading our STK Push system. Please use the manual M-PESA Paybill option above.</p>
+      <div style="margin-top:10px;">
+        <button class="btn" style="background:#999 !important; cursor:not-allowed !important;" disabled>Pay Registration Fee — STK Push</button>
+      </div>
     </div>
 
     <div class="error" id="step3-error"></div>
     <div class="status-msg" id="application-status"></div>
-
-    <button class="btn" onclick="submitApplicationManual()" style="margin-top:20px;">
-      Submit Application
-    </button>
   </div>
 
 </div>
 
 <!-- SUPABASE INITIALISATION -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = "https://obucqswptdbnktaaayoh.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_laBoykhOTssfpTfn8n1KXQ_yMt4Tt6O";
