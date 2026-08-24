@@ -54,10 +54,10 @@ const TIER_CONFIG = {
 };
 
 // =============================================================
-// PAYMENT BACKEND – 🔴 CORRECT URL (LIVE ON RENDER)
+// PAYMENT BACKEND – 🔴 USING VERCEL PROXY (NO CORS)
 // =============================================================
 
-const STK_PUSH_ENDPOINT = 'https://redcross-kenya.onrender.com/api/payments/stk-push';
+const STK_PUSH_ENDPOINT = '/api/payments/stk-push';
 let pollingInterval = null;
 
 // =============================================================
