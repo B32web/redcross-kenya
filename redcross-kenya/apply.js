@@ -54,10 +54,10 @@ const TIER_CONFIG = {
 };
 
 // =============================================================
-// PAYMENT BACKEND
+// PAYMENT BACKEND – 🔴 FIXED URL
 // =============================================================
 
-const STK_PUSH_ENDPOINT = 'https://redcross-kenya.onrender.com/api/payments/stk-push';
+const STK_PUSH_ENDPOINT = 'https://redcross-kenya-api.onrender.com/api/payments/stk-push';
 let pollingInterval = null;
 
 // =============================================================
