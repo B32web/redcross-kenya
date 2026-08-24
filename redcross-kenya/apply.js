@@ -126,7 +126,6 @@ function goToStep(stepNum) {
   if (nav2) nav2.className = 'step-item ' + (stepNum >= 2 ? 'active' : '');
   if (nav3) nav3.className = 'step-item ' + (stepNum >= 3 ? 'active' : '');
 
-  // Validate Step 1 → Step 2
   if (stepNum === 2) {
     const name = document.getElementById('reg-fullName')?.value.trim();
     const email = document.getElementById('reg-email')?.value.trim();
@@ -146,7 +145,6 @@ function goToStep(stepNum) {
     if (errorEl) errorEl.classList.remove('show');
   }
 
-  // Validate Step 2 → Step 3
   if (stepNum === 3) {
     const resultDiv = document.getElementById('assessment-result');
     if (!resultDiv || !resultDiv.dataset.tier) {
@@ -159,7 +157,6 @@ function goToStep(stepNum) {
       return;
     }
 
-    // Fill summary
     document.getElementById('sum-name').textContent = document.getElementById('reg-fullName').value;
     document.getElementById('sum-phone').textContent = document.getElementById('reg-phone').value;
     document.getElementById('sum-county').textContent = document.getElementById('reg-location').value;
@@ -167,7 +164,6 @@ function goToStep(stepNum) {
     document.getElementById('sum-grant').textContent = 'KES ' + parseInt(resultDiv.dataset.amount).toLocaleString();
     document.getElementById('sum-fee').textContent = 'KES ' + parseInt(resultDiv.dataset.fee).toLocaleString();
 
-    // Set payment details
     const fee = parseInt(resultDiv.dataset.fee);
     document.getElementById('payment-amount').textContent = fee.toLocaleString();
     document.getElementById('amount-ref').textContent = 'KES ' + fee.toLocaleString();
