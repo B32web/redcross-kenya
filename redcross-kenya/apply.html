@@ -135,14 +135,14 @@
     .copy-btn {
       background: none;
       border: none;
-      color: #D71920;
+      color: #2e7d32;
       cursor: pointer;
       font-size: 18px;
       padding: 4px 8px;
       border-radius: 4px;
       transition: 0.2s;
     }
-    .copy-btn:hover { background: #f0f0f0; }
+    .copy-btn:hover { background: #e8f5e9; }
     .payment-box {
       background: #e8f5e9;
       border-radius: 12px;
@@ -163,7 +163,6 @@
     }
     .payment-row .label { font-weight: 600; font-size: 12px; color: #555; min-width: 70px; }
     .payment-row .value { font-family: monospace; font-size: 20px; font-weight: 800; color: #2e7d32; flex: 1; }
-    .payment-row .copy-btn { color: #2e7d32; }
     .status-msg {
       margin: 15px 0;
       padding: 12px 16px;
@@ -322,11 +321,11 @@
     <button class="btn" onclick="goToStep(3)" style="margin-top:20px;">Proceed to Payment →</button>
   </div>
 
-  <!-- ==================== STEP 3 ==================== -->
+  <!-- STEP 3 -->
   <div class="step" id="reg-step-3">
     <h2 style="font-family:'Montserrat'; font-size:22px; margin-bottom:16px;">Payment & Submit</h2>
 
-    <!-- ===== NOTICE BANNER ===== -->
+    <!-- Notice Banner -->
     <div class="notice-banner">
       <p>
         ⚠️ <strong>STK Push is temporarily unavailable</strong> while we upgrade the system.<br>
@@ -345,20 +344,20 @@
       <p><strong>Registration Fee:</strong> <span id="sum-fee"></span></p>
     </div>
 
-    <!-- ===== MANUAL PAYMENT (ACTIVE) ===== -->
+    <!-- Manual Paybill (Active) -->
     <div class="payment-box">
       <h3 style="font-family:'Montserrat'; color: #1b5e20; margin-bottom:12px;">✅ Manual M-PESA Paybill (Active)</h3>
 
       <div class="payment-row">
         <span class="label">Paybill Number</span>
-        <span class="value" id="paybill-number">522533</span>
+        <span class="value">522533</span>
         <button class="copy-btn" onclick="copyToClipboard('522533')">📋 Copy</button>
       </div>
 
       <div class="payment-row">
         <span class="label">Account Number</span>
-        <span class="value" id="account-number">1302047523</span>
-        <button class="copy-btn" onclick="copyToClipboard(document.getElementById('account-number').textContent)">📋 Copy</button>
+        <span class="value">1302047523</span>
+        <button class="copy-btn" onclick="copyToClipboard('1302047523')">📋 Copy</button>
       </div>
 
       <div class="payment-row">
@@ -369,14 +368,13 @@
       <p style="font-size:13px; color:#2e7d32; margin:12px 0; line-height:1.8;">
         <strong>Instructions:</strong><br>
         1. Go to M-PESA <strong>Lipa na M-PESA</strong> → <strong>Paybill</strong><br>
-        2. Enter Business Number: <strong id="paybill-ref">522533</strong><br>
-        3. Enter Account Number: <strong id="account-ref">1302047523</strong><br>
+        2. Enter Business Number: <strong>522533</strong><br>
+        3. Enter Account Number: <strong>1302047523</strong><br>
         4. Enter Amount: <strong id="amount-ref">KES 0</strong><br>
         5. Enter your M-PESA PIN and confirm<br>
         6. Enter the M-PESA confirmation code below
       </p>
 
-      <!-- Transaction Code Input -->
       <div class="form-group" style="margin-bottom:10px;">
         <label style="font-weight:600; font-size:13px;">M-PESA Transaction Code *</label>
         <input type="text" id="mpesa-transaction-id" placeholder="e.g. QGH7X9ABC1" required />
@@ -388,7 +386,7 @@
       </button>
     </div>
 
-    <!-- ===== STK PUSH (DISABLED / COMING SOON) ===== -->
+    <!-- STK Push (Disabled) -->
     <div class="stk-disabled">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
         <h3 style="font-family:'Montserrat'; color: #666; margin:0;">🔧 STK Push</h3>
@@ -406,7 +404,7 @@
 
 </div>
 
-<!-- SUPABASE INITIALISATION -->
+<!-- Supabase Init -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = "https://obucqswptdbnktaaayoh.supabase.co";
@@ -436,7 +434,6 @@
   }
 </script>
 
-<!-- LOAD APPLY.JS -->
 <script src="apply.js"></script>
 
 </body>
